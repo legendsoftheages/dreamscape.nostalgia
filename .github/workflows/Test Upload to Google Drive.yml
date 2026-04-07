@@ -27,3 +27,8 @@ jobs:
       - name: Upload spotify.png to Drive
         run: |
           rclone copy spotify.png gdrive:1EVIHk24_3C7DsCLcYoQOdrM_T11UrkWH/ -P
+
+      - name: Debug JSON
+        run: |
+          cat ~/service_account.json
+          jq . ~/service_account.json
