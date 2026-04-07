@@ -1,31 +1,80 @@
-name: Upload to Google Drive
+name: Upload Spotify Image to Google Drive
 
 on:
   push:
+    paths:
+      - 'spotify.png'
     branches:
-      - main
+      - main  # Change this to your default branch if different
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  upload:
+  upload-to-gdrive:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install rclone
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
         run: |
-          curl https://rclone.org/install.sh | sudo bash
+          pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client
 
-      - name: Save Service Account JSON
+      - name: Upload to Google Drive
         env:
-          SA_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT }}
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_SERVICE_ACCOUNT }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
         run: |
-          echo "$SA_JSON" > /tmp/sa.json
+          python - <<'EOF'
+          import os
+          import json
+          from google.auth.transport.requests import Request
+          from google.oauth2.service_account import Credentials
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+          
+          # Parse credentials from environment variable
+          credentials_json = os.environ.get('GDRIVE_CREDENTIALS')
+          credentials_dict = json.loads(credentials_json)
+          
+          # Authenticate
+          credentials = Credentials.from_service_account_info(
+              credentials_dict,
+              scopes=['https://www.googleapis.com/auth/drive.file']
+          )
+          
+          # Build Drive API client
+          drive_service = build('drive', 'v3', credentials=credentials)
+          
+          # File to upload
+          file_path = '__spotify.png'
+          folder_id = os.environ.get('GDRIVE_FOLDER_ID')
+          
+          # Upload file
+          file_metadata = {
+              'name': '__spotify.png',
+              'parents': [folder_id]
+          }
+          
+          media = MediaFileUpload(file_path, mimetype='image/png')
+          
+          file = drive_service.files().create(
+              body=file_metadata,
+              media_body=media,
+              fields='id'
+          ).execute()
+          
+          print(f"File uploaded successfully! File ID: {file.get('id')}")
+          EOF
 
-      - name: Upload File to Google Drive
-        run: |
-          rclone copy spotify.png "drive:1EVIHk24_3C7DsCLcYoQOdrM_T11UrkWH" \
-            --drive-service-account-file /tmp/sa.json \
-            --drive-impersonate=reels-bot@spry-precinct-486106-u1.iam.gserviceaccount.com \
-            -P
+      - name: Upload artifact (optional)
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: upload-log
+          retention-days: 1
