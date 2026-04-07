@@ -19,6 +19,7 @@ jobs:
       - name: Prepare paths
         run: |
           mkdir -p output tmp
+          rm -rf output/* tmp/*
 
       - name: Run script
         run: |
@@ -30,3 +31,4 @@ jobs:
         with:
           name: final-video
           path: output/
+          retention-days: 1   # automatically deletes after 1 days
