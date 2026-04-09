@@ -101,11 +101,11 @@ gh release create "$TAG_NAME" "$out_file" \
 
 # 3. Construct the DIRECT download URL
 # Replace YOUR_USER and YOUR_REPO with your actual details
-DIRECT_URL="https://github.com/YOUR_USER/YOUR_REPO/releases/download/$TAG_NAME/${safe_name// /_}.mp4"
+DIRECT_URL="https://github.com/hiddenmemoriz/hiddenmemoriz/releases/download/$TAG_NAME/${safe_name// /_}.mp4"
 
 # 4. SEND TO WEBHOOK
 echo "🚀 Sending direct link to webhook..."
-WEBHOOK_URL="YOUR_WEBHOOK_URL_HERE"
+WEBHOOK_URL="https://hook.eu2.make.com/g89huhyl3qmcpvupe3p7nnsl6fq8uzk3"
 
 curl -X POST -H "Content-Type: application/json" \
   -d "{\"content\": \"🎥 **New Reel Generated!**\nDirect MP4 Link: $DIRECT_URL\"}" $WEBHOOK_URL
