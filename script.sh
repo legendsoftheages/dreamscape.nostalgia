@@ -95,7 +95,7 @@ if [ -n "$GH_TOKEN" ]; then
     if [ -n "$WEBHOOK_URL" ]; then
         echo "🚀 Sending Webhook..."
         curl -X POST -H "Content-Type: application/json" \
-          -d "{\"Downloadlink\": \"$DIRECT_URL\", \"File name\": \"${safe_name}"}" \
+          -d "{\"Downloadlink\": \"$DIRECT_URL\", \"File name\": \"${safe_name\}"}" \
           "$WEBHOOK_URL"
     fi
 
