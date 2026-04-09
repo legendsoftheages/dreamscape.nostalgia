@@ -93,10 +93,21 @@ if [ -n "$GH_TOKEN" ]; then
     
     # Clean up old releases to save space (keeps only the latest one)
     echo "🧹 Cleaning up old releases..."
-    gh release list --limit 10 | grep "v-" | grep -v "$TAG_NAME" | awk '{print $1}' | while read -r old_tag; do
-        gh release delete "$old_tag" --yes --cleanup-tag
-    done
+    # We add || true and check if any releases exist before looping
+    OLD_RELEASES=$(gh release list --limit 10 | grep "v-" | grep -v "$TAG_NAME" | awk '{print $1}') || true
+    
+    if [ -n "$OLD_RELEASES" ]; then
+        echo "$OLD_RELEASES" | while read -r old_tag; do
+            echo "Deleting old release: $old_tag"
+            gh release delete "$old_tag" --yes --cleanup-tag || echo "Could not delete $old_tag, skipping..."
+        done
+    else
+        echo "✨ No old releases found to clean."
+    fi
 fi
+
+echo "✅ SUCCESS! Final file: $out_file"
+rm -rf "$TMP"
 
 echo "✅ SUCCESS! Final file: $out_file"
 rm -rf "$TMP"
