@@ -1,6 +1,0 @@
-pydub          # for audio handling
-ffmpeg-python  # optional wrapper for FFmpeg
-rclone         # if you later want to upload to Google Drive
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
